@@ -20,6 +20,9 @@ class User(Base):
     username: Mapped[str] = mapped_column(String(64), unique=True, nullable=False, index=True)
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
     style_preference: Mapped[str | None] = mapped_column(String(64))
+    response_length: Mapped[str] = mapped_column(String(16), nullable=False, default="medium", server_default="medium")
+    show_sources: Mapped[bool] = mapped_column(nullable=False, default=True, server_default="1")
+    nickname: Mapped[str] = mapped_column(String(80), nullable=False, default="", server_default="")
     created_at: Mapped[datetime] = mapped_column(
         DateTime, nullable=False, server_default=func.now()
     )

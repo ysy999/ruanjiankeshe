@@ -20,6 +20,9 @@ CREATE TABLE `users` (
   `username` VARCHAR(64) NOT NULL,
   `password_hash` VARCHAR(255) NOT NULL,
   `style_preference` VARCHAR(64) DEFAULT NULL,
+  `response_length` VARCHAR(16) NOT NULL DEFAULT 'medium',
+  `show_sources` TINYINT(1) NOT NULL DEFAULT 1,
+  `nickname` VARCHAR(80) NOT NULL DEFAULT '',
   `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_users_username` (`username`)
@@ -73,7 +76,7 @@ CREATE TABLE `orders` (
 
 CREATE TABLE `call_logs` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `session_id` INT UNSIGNED NOT NULL,
+  `session_id` INT UNSIGNED DEFAULT NULL,
   `tool_name` VARCHAR(64) NOT NULL,
   `params` JSON DEFAULT NULL,
   `result` JSON DEFAULT NULL,
@@ -86,4 +89,42 @@ CREATE TABLE `call_logs` (
   CONSTRAINT `fk_call_logs_session_id`
     FOREIGN KEY (`session_id`) REFERENCES `sessions` (`id`)
     ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE `source_files` (
+  `path` VARCHAR(512) NOT NULL,
+  `md5` CHAR(32) NOT NULL,
+  `last_indexed_at` DATETIME DEFAULT NULL,
+  `status` VARCHAR(32) NOT NULL DEFAULT 'pending',
+  `chunk_count` INT UNSIGNED NOT NULL DEFAULT 0,
+  `dropped_count` INT UNSIGNED NOT NULL DEFAULT 0,
+  PRIMARY KEY (`path`),
+  KEY `idx_source_files_status` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE `doc_versions` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `doc_name` VARCHAR(512) NOT NULL,
+  `version` VARCHAR(32) NOT NULL,
+  `status` VARCHAR(32) NOT NULL DEFAULT 'active',
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_doc_versions_name_status` (`doc_name`, `status`),
+  KEY `idx_doc_versions_version` (`version`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE `feedbacks` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `session_id` INT UNSIGNED NOT NULL,
+  `message_id` INT UNSIGNED NOT NULL,
+  `score` TINYINT NOT NULL,
+  `comment` TEXT DEFAULT NULL,
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `reviewed` TINYINT(1) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`),
+  KEY `idx_feedbacks_session_id` (`session_id`),
+  KEY `idx_feedbacks_message_id` (`message_id`),
+  KEY `idx_feedbacks_reviewed_created` (`reviewed`, `created_at`),
+  CONSTRAINT `fk_feedbacks_session_id` FOREIGN KEY (`session_id`) REFERENCES `sessions` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_feedbacks_message_id` FOREIGN KEY (`message_id`) REFERENCES `messages` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

@@ -16,9 +16,9 @@ class CallLog(Base):
     __tablename__ = "call_logs"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    session_id: Mapped[int] = mapped_column(
+    session_id: Mapped[int | None] = mapped_column(
         ForeignKey("sessions.id", ondelete="CASCADE", onupdate="CASCADE"),
-        nullable=False,
+        nullable=True,
         index=True,
     )
     tool_name: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
