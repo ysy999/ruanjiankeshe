@@ -16,7 +16,7 @@ def ensure_database() -> None:
     if not database:
         raise RuntimeError("DATABASE_URL must include a database name, e.g. .../ai_cs")
 
-    admin_url = url.set(database=None)
+    admin_url = url.set(database="mysql")
     admin_engine = create_engine(admin_url, future=True)
     with admin_engine.connect() as conn:
         conn.execute(
